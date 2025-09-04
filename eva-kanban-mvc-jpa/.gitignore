@@ -1,0 +1,42 @@
+# =========================
+# Archivos y carpetas de compilación
+# =========================
+/target/
+*.class
+
+# =========================
+# IDEs y configuraciones locales
+# =========================
+.idea/
+*.iml
+*.ipr
+*.iws
+/.project
+/.classpath
+/.settings/
+
+# =========================
+# Archivos del sistema operativo
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Archivos comprimidos
+# =========================
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# Archivos temporales
+# =========================
+*.swp
+*.tmp
+*.bak
