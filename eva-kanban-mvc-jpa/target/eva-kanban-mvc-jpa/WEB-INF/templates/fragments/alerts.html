@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Fragmento: muestra alertas por query-string (?created=1, etc.) o por atributos del modelo -->
+<div th:fragment="flash">
+    <!-- Por query params (redirecciones tipo ...?created=1) -->
+    <div th:if="${param.created}" class="alert alert-success alert-dismissible fade show" role="alert">
+        Operación realizada correctamente.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${param.updated}" class="alert alert-info alert-dismissible fade show" role="alert">
+        Cambios guardados.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${param.deleted}" class="alert alert-warning alert-dismissible fade show" role="alert">
+        Registro eliminado.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Por query param con texto de error (ej: ?error=No%20autorizado) -->
+    <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${param.error}">Ocurrió un error.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Por atributos de modelo (cuando NO hay redirect) -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}">Éxito.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${info}" class="alert alert-info alert-dismissible fade show" role="alert">
+        <span th:text="${info}">Información.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show" role="alert">
+        <span th:text="${warning}">Advertencia.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}">Error.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</div>
+</body>
+</html>

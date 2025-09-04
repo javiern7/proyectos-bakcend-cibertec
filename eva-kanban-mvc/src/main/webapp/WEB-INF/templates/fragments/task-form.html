@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="taskFormFields">
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <input type="text" th:field="*{name}" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Estado</label>
+        <select th:field="*{status}" class="form-select" required>
+            <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"></option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Asignado a</label>
+        <select th:field="*{username}" class="form-select">
+            <option value="">— Seleccionar —</option>
+            <option th:each="u : ${assignees}"
+                    th:value="${u.username}"
+                    th:text="${u.username}"></option>
+        </select>
+        <small class="text-muted">Si no eliges, se asigna a ti automáticamente.</small>
+    </div>
+</div>
+</body>
+</html>

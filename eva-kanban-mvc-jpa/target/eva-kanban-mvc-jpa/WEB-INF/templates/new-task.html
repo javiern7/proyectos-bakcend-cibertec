@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="fragments/layout :: base (~{::section})">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:remove="all">Nueva Tarea</title>
+</head>
+
+<section th:fragment="content" th:with="pageTitle=${'Nueva Tarea'}">
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-header"><strong>Crear nueva tarea</strong></div>
+                <div class="card-body">
+                    <!-- 🔔 Alertas -->
+                    <div th:insert="fragments/alerts :: flash"></div>
+
+                    <form th:action="@{/task/create}" method="post" th:object="${task}">
+                        <!-- 👇 Aquí va el fragmento -->
+                        <div th:insert="fragments/task-form :: taskFormFields"></div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success">Crear</button>
+                            <a th:href="@{/board}" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</html>
