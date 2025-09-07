@@ -1,7 +1,7 @@
 package pe.edu.cibertec.eva.interceptor;
 
 import org.springframework.web.servlet.HandlerInterceptor;
-import pe.edu.cibertec.eva.dto.User;
+import pe.edu.cibertec.eva.entity.User;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

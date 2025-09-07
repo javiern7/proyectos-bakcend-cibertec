@@ -1,6 +1,6 @@
 package pe.edu.cibertec.eva.service;
 
-import pe.edu.cibertec.eva.dto.User;
+import pe.edu.cibertec.eva.entity.User;
 import java.util.List;
 
 public interface UserService {

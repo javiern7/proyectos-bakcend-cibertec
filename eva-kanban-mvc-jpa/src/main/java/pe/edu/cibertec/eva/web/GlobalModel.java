@@ -3,7 +3,7 @@ package pe.edu.cibertec.eva.web;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import pe.edu.cibertec.eva.dto.User;
+import pe.edu.cibertec.eva.entity.User;
 
 import javax.servlet.http.HttpServletRequest;
 

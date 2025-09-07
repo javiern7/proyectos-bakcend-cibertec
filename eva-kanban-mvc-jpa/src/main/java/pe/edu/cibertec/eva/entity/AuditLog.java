@@ -1,4 +1,4 @@
-package pe.edu.cibertec.eva.dto;
+package pe.edu.cibertec.eva.entity;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -6,36 +6,39 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="audit_log")
+@Table(name = "audit_log", indexes = {
+        @Index(name="idx_audit_task", columnList="task_id"),
+        @Index(name="idx_audit_created", columnList="created_at"),
+        @Index(name="idx_audit_actor", columnList="actor_id") // sugerido
+})
 public class AuditLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable=false, length=30)
-    private AuditAction action;
+    @Column(name = "action", length = 30, nullable = false)
+    private String action;
 
-    @Column(name="task_id", nullable=false)
+    @Column(name = "task_id", nullable = false)
     private Long taskId;
 
-    @Column(name="actor_id")
+    @Column(name = "actor_id")
     private Long actorId;
 
-    @Column(name="actor_username", length=60)
+    @Column(name = "actor_username", length = 60)
     private String actorUsername;
 
-    @Column(name="old_status", length=20)
+    @Column(name = "old_status", length = 20)
     private String oldStatus;
 
-    @Column(name="new_status", length=20)
+    @Column(name = "new_status", length = 20)
     private String newStatus;
 
     @Lob
+    @Column(name = "details")
     private String details;
 
-    @CreationTimestamp
-    @Column(name="created_at", updatable=false, nullable=false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     public Long getId() {
@@ -47,11 +50,11 @@ public class AuditLog {
         return this;
     }
 
-    public AuditAction getAction() {
+    public String getAction() {
         return action;
     }
 
-    public AuditLog setAction(AuditAction action) {
+    public AuditLog setAction(String action) {
         this.action = action;
         return this;
     }

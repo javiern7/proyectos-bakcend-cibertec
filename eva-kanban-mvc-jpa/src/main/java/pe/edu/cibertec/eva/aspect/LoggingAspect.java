@@ -5,9 +5,9 @@ import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import pe.edu.cibertec.eva.dto.Status;
-import pe.edu.cibertec.eva.dto.Task;
-import pe.edu.cibertec.eva.dto.User;
+import pe.edu.cibertec.eva.entity.Status;
+import pe.edu.cibertec.eva.entity.Task;
+import pe.edu.cibertec.eva.entity.User;
 
 @Aspect
 @Component

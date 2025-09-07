@@ -1,0 +1,51 @@
+<!-- /WEB-INF/templates/fragments/task-form.html -->
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="taskFormFields">
+    <!-- OWNER (propietario) -->
+    <div class="mb-3">
+        <label class="form-label">Propietario</label>
+        <select class="form-select" name="ownerId"
+                th:disabled="${!#strings.equalsIgnoreCase(user.role, 'ADMIN')}">
+            <option value="" disabled selected>-- Seleccionar --</option>
+            <option th:each="u : ${owners}"
+                    th:value="${u.id}"
+                    th:text="${u.username}"
+                    th:selected="${task.owner != null} ? ${u.id} == ${task.owner.id} : false"></option>
+        </select>
+        <!-- si bloqueas a USER el select, puedes opcionalmente enviar su id oculto -->
+        <input type="hidden" name="ownerId" th:value="${user.id}"
+               th:if="${!#strings.equalsIgnoreCase(user.role, 'ADMIN')}"/>
+    </div>
+
+    <!-- ASSIGNED TO (asignado) -->
+    <div class="mb-3">
+        <label class="form-label">Asignado a</label>
+        <select class="form-select" name="assigneeId"
+                th:disabled="${!#strings.equalsIgnoreCase(user.role, 'ADMIN')}">
+            <option value="" disabled selected>-- Seleccionar --</option>
+            <option th:each="u : ${assignees}"
+                    th:value="${u.id}"
+                    th:text="${u.username}"
+                    th:selected="${task.assignedTo != null} ? ${u.id} == ${task.assignedTo.id} : false"></option>
+        </select>
+        <input type="hidden" name="assigneeId" th:value="${user.id}"
+               th:if="${!#strings.equalsIgnoreCase(user.role, 'ADMIN')}"/>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <input type="text" th:field="*{title}" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Descripción</label>
+        <textarea th:field="*{description}" class="form-control" rows="3"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Estado</label>
+        <select th:field="*{status}" class="form-select" required>
+            <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"></option>
+        </select>
+    </div>
+
+</div>

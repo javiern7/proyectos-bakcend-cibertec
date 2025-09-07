@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.SessionAttribute;
-import pe.edu.cibertec.eva.dto.User;
+import pe.edu.cibertec.eva.entity.User;
 
 @Controller
 public class ErrorPageController {

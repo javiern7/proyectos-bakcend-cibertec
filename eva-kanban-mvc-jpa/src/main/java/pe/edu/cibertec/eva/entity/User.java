@@ -1,4 +1,4 @@
-package pe.edu.cibertec.eva.dto;
+package pe.edu.cibertec.eva.entity;
 
 import javax.persistence.*;
 

@@ -1,0 +1,29 @@
+package pe.edu.cibertec.eva.aspect;
+
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.Aspect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import pe.edu.cibertec.eva.entity.Status;
+import pe.edu.cibertec.eva.entity.TaskEntity;
+import pe.edu.cibertec.eva.entity.UserEntity;
+
+@Aspect
+@Component
+public class LoggingAspect {
+  private static final Logger log = LoggerFactory.getLogger(LoggingAspect.class);
+
+  @AfterReturning(pointcut = "execution(* pe.edu.cibertec.eva.service.TaskService.create(..)) && args(task, user)",
+                  returning = "result")
+  public void logCreate(TaskEntity task, UserEntity user, Object result){
+      TaskEntity saved = (TaskEntity) result;
+    log.info("TASK-CREATE by={} id={} title='{}' assignee={}", user.getUsername(), saved.getId(), saved.getTitle(), saved.getUsername());
+  }
+
+  @AfterReturning(pointcut = "execution(* pe.edu.cibertec.eva.service.TaskService.updateStatus(..)) && args(id, status, user)",
+                  returning = "result")
+  public void logUpdate(Long id, Status status, UserEntity user, Object result){
+    log.info("TASK-UPDATE by={} id={} newStatus={}", user.getUsername(), id, status);
+  }
+}

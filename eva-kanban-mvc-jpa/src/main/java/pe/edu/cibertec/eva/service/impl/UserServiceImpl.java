@@ -2,7 +2,7 @@ package pe.edu.cibertec.eva.service.impl;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pe.edu.cibertec.eva.dto.User;
+import pe.edu.cibertec.eva.entity.User;
 import pe.edu.cibertec.eva.repository.UserRepository;
 import pe.edu.cibertec.eva.service.UserService;
 

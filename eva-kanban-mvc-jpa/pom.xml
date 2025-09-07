@@ -130,6 +130,26 @@
             <artifactId>jboss-logging</artifactId>
             <version>3.3.0.Final</version>
         </dependency>
+        <!-- Excel OOXML + SXSSF (streaming) -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.5</version>
+        </dependency>
+
+        <!-- (Opcional) API HSSF/POI “clásica” -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>5.2.5</version>
+        </dependency>
+
+        <!-- (Opcional) utilidades de IO -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.16.1</version>
+        </dependency>
 
     </dependencies>
 

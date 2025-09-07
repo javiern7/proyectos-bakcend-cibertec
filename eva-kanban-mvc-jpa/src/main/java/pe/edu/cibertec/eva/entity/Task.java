@@ -1,4 +1,4 @@
-package pe.edu.cibertec.eva.dto;
+package pe.edu.cibertec.eva.entity;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -12,13 +12,17 @@ public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "title", nullable=false, length=120)
+
+    @Column(nullable=false, length=120)
     private String title;
+
     @Column(columnDefinition="TEXT")
     private String description;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable=false, length=20)
     private Status status = Status.ASSIGNED;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="owner_id", nullable=false)
     private User owner;

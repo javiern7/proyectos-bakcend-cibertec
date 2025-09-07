@@ -1,128 +1,221 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="fragments/layout :: base (~{::section})">
-<head>
-    <meta charset="UTF-8"/>
-    <title th:remove="all">Tablero de Tareas</title>
-    <style>
-        .dropzone.drag-over { outline: 2px dashed #0d6efd; background: #eef6ff; }
-    </style>
-</head>
+    <head>
+        <meta charset="UTF-8"/>
+        <title th:remove="all">Tablero de Tareas</title>
+        <style>
+            .dropzone.drag-over { outline: 2px dashed #0d6efd; background: #eef6ff; }
+        </style>
+    </head>
 
-<section class="container mt-5" th:fragment="content"
-         th:with="pageTitle=${'Tablero de Tareas'}">
+    <section class="container mt-5" th:fragment="content"
+             th:with="pageTitle=${'Tablero de Tareas'}">
 
-    <script th:inline="javascript">
-        /*<![CDATA[*/
-        window.ctx = /*[[${#httpServletRequest.getContextPath()}]]*/ '';
-        window.isAdmin = /*[[${isAdmin}]]*/ false;
-        /*]]>*/
-    </script>
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            window.ctx = /*[[${#httpServletRequest.getContextPath()}]]*/ '';
+            window.isAdmin = /*[[${isAdmin}]]*/ false;
+            /*]]>*/
+        </script>
 
-    <h2 class="mb-4 text-center">
-        Tablero Kanban - Bienvenido <span th:text="${user.username}"></span>
-    </h2>
+        <h2 class="mb-4 text-center">
+            Tablero Kanban - Bienvenido <span th:text="${user.username}"></span>
+        </h2>
 
-    <div class="d-flex justify-content-end mb-3">
-        <a th:href="@{/task/new}" class="btn btn-success me-2">Nueva tarea</a>
-        <a class="btn btn-outline-secondary" th:if="${isAdmin}" th:href="@{/admin/users}">Usuarios</a>
-    </div>
+        <!-- Tabs -->
+        <ul class="nav nav-tabs mb-3" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-board" type="button" role="tab">
+                    Tablero
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-dashboard" type="button" role="tab">
+                    Dashboard
+                </button>
+            </li>
+            <li class="nav-item" role="presentation" th:if="${isAdmin}">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-auditoria" type="button" role="tab">
+                    Auditoría
+                </button>
+            </li>
+        </ul>
 
-    <!-- Alertas -->
-    <div th:insert="fragments/alerts :: flash"></div>
+        <div class="tab-content">
+            <!-- 1) Tablero (aquí meteremos lo que ya tienes) -->
+            <div class="tab-pane fade show active" id="tab-board" role="tabpanel">
+                <!-- ⬇️ Move aquí lo que ya existe: botones + alertas + badges + row de columnas -->
+                <div class="d-flex justify-content-end mb-3">
+                    <a th:href="@{/task/new}" class="btn btn-success me-2">Nueva tarea</a>
+                    <a class="btn btn-outline-secondary" th:if="${isAdmin}" th:href="@{/admin/users}">Usuarios</a>
+                </div>
 
-    <!-- Badges de conteo por usuario (desde metrics) -->
-    <div class="row text-center mb-3">
-        <div class="col">
-      <span class="badge bg-warning">Asignadas:
-        <span id="count-assigned" th:text="${metrics['ASSIGNED']}">0</span>
-      </span>
-        </div>
-        <div class="col">
-      <span class="badge bg-primary">En Proceso:
-        <span id="count-inprogress" th:text="${metrics['IN_PROGRESS']}">0</span>
-      </span>
-        </div>
-        <div class="col">
-      <span class="badge bg-success">Finalizadas:
-        <span id="count-done" th:text="${metrics['DONE']}">0</span>
-      </span>
-        </div>
-    </div>
+                <!-- Alertas -->
+                <div th:insert="fragments/alerts :: flash"></div>
 
-    <div class="row">
-        <!-- ASIGNADAS -->
-        <div class="col-md-4">
-            <h5 class="text-warning">Asignadas</h5>
-            <div class="kanban-col dropzone" data-status="ASSIGNED">
-                <div th:each="task : ${assignedTasks}"
-                     class="card task-card ASSIGNED"
-                     th:attr="data-id=${task.id},
-                        data-status=${task.status.name()},
-                        data-owner=${user != null and task.assignedTo != null and task.assignedTo.id == user.id},
-                        draggable=${ (isAdmin or (task.assignedTo != null and user != null and task.assignedTo.id == user.id))
-                                   and task.status.name() != 'DONE' }">
-                    <div class="card-body">
-                        <h6 class="card-title" th:text="${task.title}">Tarea</h6>
-                        <p class="card-text">Asignado a:
-                            <span th:text="${task.assignedTo != null ? task.assignedTo.username : '—'}"></span>
-                        </p>
-                        <div class="task-actions"
-                             th:replace="fragments/task-actions :: actions(${task}, ${user})">
+                <!-- Badges de conteo por usuario (desde metrics) -->
+                <div class="row text-center mb-3">
+                    <div class="col">
+                      <span class="badge bg-warning">Asignadas:
+                        <span id="count-assigned" th:text="${metrics['ASSIGNED']}">0</span>
+                      </span>
+                    </div>
+                    <div class="col">
+                      <span class="badge bg-primary">En Proceso:
+                        <span id="count-inprogress" th:text="${metrics['IN_PROGRESS']}">0</span>
+                      </span>
+                    </div>
+                    <div class="col">
+                      <span class="badge bg-success">Finalizadas:
+                        <span id="count-done" th:text="${metrics['DONE']}">0</span>
+                      </span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- ASIGNADAS -->
+                    <div class="col-md-4">
+                        <h5 class="text-warning">Asignadas</h5>
+                        <div class="kanban-col dropzone" data-status="ASSIGNED">
+                            <div th:each="task : ${assignedTasks}"
+                                 class="card task-card ASSIGNED"
+                                 th:attr="data-id=${task.id},
+                            data-status=${task.status.name()},
+                            data-owner=${user != null and task.assignedTo != null and task.assignedTo.id == user.id},
+                            draggable=${ (isAdmin or (task.assignedTo != null and user != null and task.assignedTo.id == user.id))
+                                       and task.status.name() != 'DONE' }">
+                                <div class="card-body">
+                                    <h6 class="card-title" th:text="${task.title}">Tarea</h6>
+                                    <p class="card-text">Asignado a:
+                                        <span th:text="${task.assignedTo != null ? task.assignedTo.username : '—'}"></span>
+                                    </p>
+                                    <div class="task-actions"
+                                         th:replace="fragments/task-actions :: actions(${task}, ${user})">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EN PROCESO -->
+                    <div class="col-md-4">
+                        <h5 class="text-primary">En Proceso</h5>
+                        <div class="kanban-col dropzone" data-status="IN_PROGRESS">
+                            <div th:each="task : ${inProgressTasks}"
+                                 class="card task-card IN_PROGRESS"
+                                 th:attr="data-id=${task.id},
+                            data-status=${task.status.name()},
+                            data-owner=${user != null and task.assignedTo != null and task.assignedTo.id == user.id},
+                            draggable=${ (isAdmin or (task.assignedTo != null and user != null and task.assignedTo.id == user.id))
+                                       and task.status.name() != 'DONE' }">
+                                <div class="card-body">
+                                    <h6 class="card-title" th:text="${task.title}">Tarea</h6>
+                                    <p class="card-text">Asignado a:
+                                        <span th:text="${task.assignedTo != null ? task.assignedTo.username : '—'}"></span>
+                                    </p>
+                                    <div class="task-actions"
+                                         th:replace="fragments/task-actions :: actions(${task}, ${user})">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FINALIZADAS -->
+                    <div class="col-md-4">
+                        <h5 class="text-success">Finalizadas</h5>
+                        <div class="kanban-col dropzone" data-status="DONE">
+                            <div th:each="task : ${doneTasks}"
+                                 class="card task-card DONE"
+                                 th:attr="data-id=${task.id},
+                            data-status=${task.status.name()},
+                            data-owner=${user != null and task.assignedTo != null and task.assignedTo.id == user.id},
+                            draggable=${ (isAdmin or (task.assignedTo != null and user != null and task.assignedTo.id == user.id))
+                                       and task.status.name() != 'DONE' }">
+                                <div class="card-body">
+                                    <h6 class="card-title" th:text="${task.title}">Tarea</h6>
+                                    <p class="card-text">Asignado a:
+                                        <span th:text="${task.assignedTo != null ? task.assignedTo.username : '—'}"></span>
+                                    </p>
+                                    <div class="task-actions"
+                                         th:replace="fragments/task-actions :: actions(${task}, ${user})">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- EN PROCESO -->
-        <div class="col-md-4">
-            <h5 class="text-primary">En Proceso</h5>
-            <div class="kanban-col dropzone" data-status="IN_PROGRESS">
-                <div th:each="task : ${inProgressTasks}"
-                     class="card task-card IN_PROGRESS"
-                     th:attr="data-id=${task.id},
-                        data-status=${task.status.name()},
-                        data-owner=${user != null and task.assignedTo != null and task.assignedTo.id == user.id},
-                        draggable=${ (isAdmin or (task.assignedTo != null and user != null and task.assignedTo.id == user.id))
-                                   and task.status.name() != 'DONE' }">
-                    <div class="card-body">
-                        <h6 class="card-title" th:text="${task.title}">Tarea</h6>
-                        <p class="card-text">Asignado a:
-                            <span th:text="${task.assignedTo != null ? task.assignedTo.username : '—'}"></span>
-                        </p>
-                        <div class="task-actions"
-                             th:replace="fragments/task-actions :: actions(${task}, ${user})">
+            <!-- 2) Dashboard -->
+            <div class="tab-pane fade p-2" id="tab-dashboard" role="tabpanel">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h6 class="mb-2">Resumen personal</h6>
+                                <ul class="list-group list-group-flush small">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Asignadas</span><strong id="dash-assigned">0</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>En Proceso</span><strong id="dash-inprogress">0</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Finalizadas</span><strong id="dash-done">0</strong>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h6 class="mb-2">Evolución semanal</h6>
+                                <canvas id="chart-week" height="120"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- FINALIZADAS -->
-        <div class="col-md-4">
-            <h5 class="text-success">Finalizadas</h5>
-            <div class="kanban-col dropzone" data-status="DONE">
-                <div th:each="task : ${doneTasks}"
-                     class="card task-card DONE"
-                     th:attr="data-id=${task.id},
-                        data-status=${task.status.name()},
-                        data-owner=${user != null and task.assignedTo != null and task.assignedTo.id == user.id},
-                        draggable=${ (isAdmin or (task.assignedTo != null and user != null and task.assignedTo.id == user.id))
-                                   and task.status.name() != 'DONE' }">
-                    <div class="card-body">
-                        <h6 class="card-title" th:text="${task.title}">Tarea</h6>
-                        <p class="card-text">Asignado a:
-                            <span th:text="${task.assignedTo != null ? task.assignedTo.username : '—'}"></span>
-                        </p>
-                        <div class="task-actions"
-                             th:replace="fragments/task-actions :: actions(${task}, ${user})">
-                        </div>
+            <!-- 3) Auditoría (solo ADMIN) -->
+            <div class="tab-pane fade p-2" id="tab-auditoria" role="tabpanel" th:if="${isAdmin}">
+                <div class="d-flex gap-2 align-items-end mb-2">
+                    <!-- Filtros simples -->
+                    <input class="form-control form-control-sm" id="flt-actor" placeholder="actorId">
+                    <input class="form-control form-control-sm" id="flt-task" placeholder="taskId">
+                    <input class="form-control form-control-sm" id="flt-action" placeholder="action (EDIT/STATUS_CHANGE)">
+                    <input class="form-control form-control-sm" id="flt-old" placeholder="oldStatus">
+                    <input class="form-control form-control-sm" id="flt-new" placeholder="newStatus">
+                    <input class="form-control form-control-sm" id="flt-days" placeholder="days" value="7">
+
+                    <button id="btn-audit-apply" class="btn btn-sm btn-primary">Aplicar</button>
+                    <a id="btn-audit-export" class="btn btn-sm btn-outline-secondary"
+                       th:href="@{/audit/export}">Exportar Excel</a>
+                </div>
+                <div class="table-responsive">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle" id="tbl-audit">
+                            <thead>
+                            <tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Tarea</th><th>Anterior</th><th>Nuevo</th><th>Detalle</th></tr>
+                            </thead>
+                            <tbody><!-- se llena por JS --></tbody>
+                        </table>
                     </div>
+                    <div class="d-flex align-items-center gap-2 my-2">
+                        <button id="audit-prev" class="btn btn-sm btn-outline-secondary">« Anterior</button>
+                        <span id="audit-page" class="small text-muted"></span>
+                        <button id="audit-next" class="btn btn-sm btn-outline-secondary">Siguiente »</button>
+                    </div>
+                </div>
                 </div>
             </div>
         </div>
-    </div>
 
-</section>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script th:src="@{/js/dashboard.js}"></script>
+
+    </section>
 </html>

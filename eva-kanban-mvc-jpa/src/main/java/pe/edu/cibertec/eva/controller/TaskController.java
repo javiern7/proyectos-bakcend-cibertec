@@ -1,16 +1,19 @@
 package pe.edu.cibertec.eva.controller;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import pe.edu.cibertec.eva.dto.Status;
-import pe.edu.cibertec.eva.dto.Task;
-import pe.edu.cibertec.eva.dto.User;
+import pe.edu.cibertec.eva.entity.Status;
+import pe.edu.cibertec.eva.entity.Task;
+import pe.edu.cibertec.eva.entity.User;
 import pe.edu.cibertec.eva.service.TaskService;
 import pe.edu.cibertec.eva.service.UserService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -132,14 +135,15 @@ public class TaskController {
 
     @GetMapping("/task/edit/{id}")
     public String edit(@PathVariable Long id,
-                       @SessionAttribute("user") User current,
+                       @SessionAttribute("user") User user,
                        Model model) {
-        model.addAttribute("user", current);
+        Task t = taskService.findById(id);
+        model.addAttribute("user", user);
         model.addAttribute("pageTitle", "Editar Tarea");
-        model.addAttribute("task", taskService.findById(id));
-        model.addAttribute("assignees", userService.findAll());
-        model.addAttribute("owners", userService.findAll());
-        return "edit-task";
+        model.addAttribute("task", t);
+        // lista de posibles asignatarios: si ADMIN todos, si USER solo él
+        model.addAttribute("assignees", isAdmin(user) ? userService.findAll() : List.of(user));
+        return "edit-task"; // tu vista
     }
 
     /*@PostMapping("/task/update")
@@ -151,16 +155,16 @@ public class TaskController {
     }*/
 
     @PostMapping("/task/update")
-    public String update(@ModelAttribute("task") Task task,
-                         @RequestParam(value = "ownerId", required = false) Long ownerId,
-                         @RequestParam(value = "assigneeId", required = false) Long assigneeId,
-                         @SessionAttribute("user") User current) {
-        taskService.update(task, current, ownerId, assigneeId);
+    public String update(@ModelAttribute("task") Task form,
+                         @RequestParam(required = false) Long ownerId,
+                         @RequestParam(required = false) Long assigneeId,
+                         @SessionAttribute("user") User actor) {
+        taskService.update(form, actor, ownerId, assigneeId);
         return "redirect:/board?updated=1";
     }
 
     // Botón o AJAX para cambiar estado
-    @PostMapping("/task/{id}/status")
+    /*@PostMapping("/task/{id}/status")
     public Object updateStatus(@PathVariable Long id,
                                @RequestParam Status status,
                                @SessionAttribute("user") User actor,
@@ -170,6 +174,41 @@ public class TaskController {
         boolean ajax = "XMLHttpRequest".equalsIgnoreCase(xrw);
         return ajax ? new ResponseEntity<>("OK", HttpStatus.OK)
                 : "redirect:/board?updated=1";
+    }*/
+
+    @PostMapping(value = "/task/{id}/status", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> changeStatus(@PathVariable Long id,
+                                          @RequestParam("status") Status status,
+                                          @SessionAttribute("user") User actor,
+                                          @RequestHeader(value = "X-Requested-With", required = false) String xhr,
+                                          HttpServletRequest request) {
+        try {
+            taskService.updateStatus(id, status, actor);
+
+            // AJAX (nuestro fetch envía este header)
+            if ("XMLHttpRequest".equalsIgnoreCase(xhr)) {
+                return ResponseEntity.ok().build();
+            }
+
+            // NO-AJAX: redirige con context path
+            String ctx = request.getContextPath(); // ej: /eva_kanban_mvc_jpa
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header(HttpHeaders.LOCATION, ctx + "/board?saved=1")
+                    .build();
+
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("No se pudo actualizar el estado");
+        }
+    }
+
+    @GetMapping("/task/{id}/status")
+    public String statusGuard(HttpServletRequest request) {
+        return "redirect:" + request.getContextPath() + "/board";
     }
 
     @PostMapping("/task/{id}/reassign")
@@ -184,7 +223,7 @@ public class TaskController {
     public String delete(@PathVariable Long id,
                          @SessionAttribute("user") User actor) {
         if (!isAdmin(actor)) return "redirect:/access-denied";
-        taskService.delete(id, actor); // auditoría DELETE con actor
+        taskService.delete(id, actor);
         return "redirect:/board?deleted=1";
     }
 
@@ -192,6 +231,5 @@ public class TaskController {
     public List<User> assignees() {
         return userService.findAll();
     }
-
 
 }

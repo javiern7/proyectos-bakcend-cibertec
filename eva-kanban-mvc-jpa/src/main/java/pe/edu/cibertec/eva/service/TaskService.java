@@ -1,8 +1,8 @@
 package pe.edu.cibertec.eva.service;
 
-import pe.edu.cibertec.eva.dto.Status;
-import pe.edu.cibertec.eva.dto.Task;
-import pe.edu.cibertec.eva.dto.User;
+import pe.edu.cibertec.eva.entity.Status;
+import pe.edu.cibertec.eva.entity.Task;
+import pe.edu.cibertec.eva.entity.User;
 import java.util.*;
 
 
@@ -20,7 +20,7 @@ public interface TaskService {
     Task reassign(Long id, String newUsername, User actor);   // con actor (auditoría)
     void delete(Long id);
     void delete(Long id, User actor);
-    long countAssigned();
-    long countInProgress();
-    long countDone();
+    //long countAssigned();
+    //long countInProgress();
+    //long countDone();
 }

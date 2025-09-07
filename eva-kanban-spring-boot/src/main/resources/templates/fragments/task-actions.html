@@ -1,0 +1,70 @@
+<!-- /WEB-INF/templates/fragments/task-actions.html -->
+<div xmlns:th="http://www.thymeleaf.org"
+     th:fragment="actions (task, user)"
+     class="task-actions">
+
+    <!-- ADMIN: todo habilitado -->
+    <div th:if="${isAdmin}">
+        <a th:href="@{/task/{id}/edit(id=${task.id})}"
+           class="btn btn-sm btn-outline-secondary me-2">Editar</a>
+
+        <!-- Siguiente estado -->
+        <form th:if="${task.status.name() == 'ASSIGNED'}"
+              th:action="@{'/task/' + ${task.id} + '/status'}"
+              method="post" class="d-inline">
+            <input type="hidden" name="status" value="IN_PROGRESS"/>
+            <button class="btn btn-sm btn-outline-primary me-2">→ En Proceso</button>
+        </form>
+
+        <form th:if="${task.status.name() == 'IN_PROGRESS'}"
+              th:action="@{'/task/' + ${task.id} + '/status'}"
+              method="post" class="d-inline">
+            <input type="hidden" name="status" value="DONE"/>
+            <button class="btn btn-sm btn-outline-primary me-2">→ En Terminado</button>
+        </form>
+
+        <form th:action="@{'/task/' + ${task.id} + '/delete'}"
+              method="post" class="d-inline"
+              onsubmit="return confirm('¿Eliminar la tarea?');">
+            <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+        </form>
+    </div>
+
+    <!-- USER asignado: Editar habilitado, Cambiar estado habilitado si NO está en DONE; Eliminar deshabilitado -->
+    <div th:if="${!isAdmin
+                 and user != null
+                 and task.assignedTo != null
+                 and user.username == task.assignedTo.username}">
+        <a th:href="@{/task/{id}/edit(id=${task.id})}"
+           class="btn btn-sm btn-outline-secondary me-2">Editar</a>
+
+        <form th:if="${task.status.name() == 'ASSIGNED'}"
+              th:action="@{'/task/' + ${task.id} + '/status'}"
+              method="post" class="d-inline">
+            <input type="hidden" name="status" value="IN_PROGRESS"/>
+            <button class="btn btn-sm btn-outline-primary me-2">→ En Proceso</button>
+        </form>
+
+        <form th:if="${task.status.name() == 'IN_PROGRESS'}"
+              th:action="@{'/task/' + ${task.id} + '/status'}"
+              method="post" class="d-inline">
+            <input type="hidden" name="status" value="DONE"/>
+            <button class="btn btn-sm btn-outline-primary me-2">→ En Terminado</button>
+        </form>
+
+        <button class="btn btn-sm btn-outline-danger" disabled
+                title="Solo admin puede eliminar">Eliminar</button>
+    </div>
+
+    <!-- Otros usuarios (no asignado) o DONE sin permisos: todo deshabilitado -->
+    <div th:if="${!isAdmin and (user == null
+                 or task.assignedTo == null
+                 or user.username != task.assignedTo.username)}">
+        <button class="btn btn-sm btn-outline-secondary me-2" disabled
+                title="No puedes editar esta tarea">Editar</button>
+        <button class="btn btn-sm btn-outline-primary me-2" disabled
+                title="No puedes cambiar el estado">Cambiar estado</button>
+        <button class="btn btn-sm btn-outline-danger" disabled
+                title="Solo admin puede eliminar">Eliminar</button>
+    </div>
+</div>
