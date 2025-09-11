@@ -3,11 +3,14 @@ package pe.edu.cibertec.eva.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 import pe.edu.cibertec.eva.entity.Status;
 import pe.edu.cibertec.eva.entity.TaskEntity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+@Repository
 public interface TaskRepository extends JpaRepository<TaskEntity,Long> {
     // Trae todas las tareas con su owner ya inicializado
     @Query("select t from TaskEntity t join fetch t.owner")
@@ -41,9 +44,9 @@ public interface TaskRepository extends JpaRepository<TaskEntity,Long> {
     // ajusta el nombre real de tu tabla. Si usas @Table(name="tasks"), usa "tasks"
     @Query(value = """
       SELECT DATE(t.updated_at) AS d,
-             SUM(CASE WHEN t.status = 'ASSIGNED'    THEN 1 ELSE 0 END) AS assigned,
+             SUM(CASE WHEN t.status = 'ASSIGNED' THEN 1 ELSE 0 END) AS assigned,
              SUM(CASE WHEN t.status = 'IN_PROGRESS' THEN 1 ELSE 0 END) AS inProgress,
-             SUM(CASE WHEN t.status = 'DONE'        THEN 1 ELSE 0 END) AS done
+             SUM(CASE WHEN t.status = 'DONE' THEN 1 ELSE 0 END) AS done
       FROM tasks t
       WHERE (t.assigned_to_id = :userId OR t.owner_id = :userId)
         AND t.updated_at >= DATE_SUB(CURDATE(), INTERVAL :days DAY)
@@ -51,4 +54,24 @@ public interface TaskRepository extends JpaRepository<TaskEntity,Long> {
       ORDER BY d
     """, nativeQuery = true)
     List<Object[]> weeklyStatusCounts(@Param("userId") Long userId, @Param("days") int days);
+
+    @Query("""
+        select t.status, count(t)
+          from TaskEntity t
+         where (:userId is null or t.assignedTo.id = :userId)
+           and (:from  is null or t.updatedAt >= :from)
+           and (:to    is null or t.updatedAt <= :to)
+         group by t.status
+    """)
+    List<Object[]> countByStatus(@Param("userId") Long userId,
+                                 @Param("from") LocalDateTime from,
+                                 @Param("to")   LocalDateTime to);
+
+    @Query("""
+        select t.status as status, count(t) as cnt
+          from TaskEntity t
+         where (:userId is null or t.assignedTo.id = :userId)
+         group by t.status
+    """)
+    List<Object[]> countByStatusForUser(@Param("userId") Long userId);
 }

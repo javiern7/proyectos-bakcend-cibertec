@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name="tasks")
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class TaskEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

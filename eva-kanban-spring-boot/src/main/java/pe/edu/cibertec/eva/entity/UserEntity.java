@@ -24,5 +24,11 @@ public class UserEntity {
     private String role;
     @Column(nullable=false)
     private Boolean enabled = true;
+
+    public boolean isAdmin() {
+        if (role == null) return false;
+        String r = role.trim().toUpperCase();
+        return "ADMIN".equals(r) || "ROLE_ADMIN".equals(r);
+    }
     
 }

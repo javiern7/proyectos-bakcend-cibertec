@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org"
       th:replace="fragments/layout :: base (~{::section})">
 <head>
     <meta charset="UTF-8"/>
@@ -12,23 +12,23 @@
 
     <form th:action="@{/admin/users/create}" method="post" th:object="${userForm}">
         <div class="mb-3">
-            <label class="form-label">Nombre de Usuario</label>
-            <input type="text" th:field="*{username}" class="form-control" required>
+            <label for="username" class="form-label">Nombre de Usuario</label>
+            <input type="text" th:field="*{username}" id="username" class="form-control" required>
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Contraseña</label>
-            <input type="password" th:field="*{password}" class="form-control" required>
+            <label for="password" class="form-label">Contraseña</label>
+            <input type="password" th:field="*{password}" id="password" class="form-control" required>
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Correo Electronico</label>
-            <input type="text" th:field="*{email}" class="form-control" required>
+            <label for="email" class="form-label">Correo Electronico</label>
+            <input type="text" th:field="*{email}" id="email" class="form-control" required>
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Rol</label>
-            <select th:field="*{role}" class="form-select" required>
+            <label for="role" class="form-label">Rol</label>
+            <select th:field="*{role}" id="role" class="form-select" required>
                 <option value="" disabled selected>Seleccione</option>
                 <option value="USER">Usuario</option>
                 <option value="ADMIN">Administrador</option>

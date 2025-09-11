@@ -19,7 +19,7 @@ body.login-bg{
     box-shadow: 0 10px 30px rgba(0,0,0,.2);
 }
 
-/* (Opcional) overlay para más contraste de texto en el login
+
 body.login-bg::before{
   content: "";
   position: fixed;
@@ -27,4 +27,3 @@ body.login-bg::before{
   background: rgba(0,0,0,.25);
   pointer-events: none;
 }
-*/

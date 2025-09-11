@@ -20,6 +20,8 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import pe.edu.cibertec.eva.util.Constants;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -151,8 +153,8 @@ public class AuditLogServiceImpl implements AuditLogService {
         List<Predicate> where = new ArrayList<>();
 
         // Rango de fechas (cuando >= from AND cuando <= to)
-        where.add(cb.greaterThanOrEqualTo(root.get("createdAt"), from));
-        where.add(cb.lessThanOrEqualTo(root.get("createdAt"), to));
+        where.add(cb.greaterThanOrEqualTo(root.get(Constants.ATRIBUT_CREATED_AT), from));
+        where.add(cb.lessThanOrEqualTo(root.get(Constants.ATRIBUT_CREATED_AT), to));
 
         if (actorId != null) {
             where.add(cb.equal(root.get("actorId"), actorId));
@@ -171,7 +173,7 @@ public class AuditLogServiceImpl implements AuditLogService {
         }
 
         cq.where(where.toArray(Predicate[]::new));
-        cq.orderBy(cb.desc(root.get("createdAt")));
+        cq.orderBy(cb.desc(root.get(Constants.ATRIBUT_CREATED_AT)));
 
         List<AuditLogEntity> list = em.createQuery(cq).getResultList();
 

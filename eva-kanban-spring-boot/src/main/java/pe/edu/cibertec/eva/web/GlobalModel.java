@@ -3,28 +3,22 @@ package pe.edu.cibertec.eva.web;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import pe.edu.cibertec.eva.entity.UserEntity;
 
 import jakarta.servlet.http.HttpServletRequest;
+import pe.edu.cibertec.eva.util.Constants;
 
 @ControllerAdvice
 public class GlobalModel {
 
     @ModelAttribute
-    public void injectGlobals(HttpServletRequest req, Model model) {
-        UserEntity user = (UserEntity) req.getSession().getAttribute("user");
-
-        // ✅ Ponlos en request (no en model) para que NO aparezcan en la query del redirect
-        req.setAttribute("user", user);
-        req.setAttribute("ctx", req.getContextPath());
-
-        boolean isAdmin = false;
-        if (user != null) {
-            try { isAdmin = "ADMIN".equalsIgnoreCase(user.getRole()); } catch (Throwable ignore) {}
-        }
-        req.setAttribute("isAdmin", isAdmin);
-
-        // (Opcional) si en alguna vista necesitas sí o sí en Model:
-        // model.addAttribute("user", user);
+    public void common(Model model,
+                       HttpServletRequest req,
+                       @SessionAttribute(value = "user", required = false) UserEntity user) {
+        model.addAttribute("ctx", req.getContextPath());
+        boolean isAdmin = user != null && user.getRole().equalsIgnoreCase(Constants.ATRIBUT_ADMIN);
+        model.addAttribute("user", user);
+        model.addAttribute("isAdmin", isAdmin);
     }
 }

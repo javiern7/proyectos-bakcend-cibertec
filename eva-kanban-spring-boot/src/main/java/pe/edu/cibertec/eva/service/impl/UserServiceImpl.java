@@ -48,6 +48,7 @@ public class UserServiceImpl implements UserService {
         UserEntity e = userRepository.findById(u.getId()).orElseThrow();
         e.setUsername(u.getUsername());
         e.setPassword(u.getPassword());
+        e.setEmail(u.getEmail());
         e.setRole(u.getRole());
         e.setEnabled(Boolean.TRUE.equals(u.getEnabled()));
         return userRepository.save(e);

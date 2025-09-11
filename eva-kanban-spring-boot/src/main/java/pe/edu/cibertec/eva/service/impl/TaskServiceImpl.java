@@ -13,6 +13,7 @@ import pe.edu.cibertec.eva.service.TaskService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
@@ -33,9 +34,6 @@ public class TaskServiceImpl implements TaskService {
         return u != null && u.getRole().equalsIgnoreCase("ADMIN"); // ajusta a tu enum/propiedad real
     }
 
-    private void ensureExists(TaskEntity t, Long id) {
-        if (t == null) throw new IllegalArgumentException("Task " + id + " no existe");
-    }
 
     private Status nextOf(Status s) {
         if (s == Status.ASSIGNED)
@@ -47,7 +45,7 @@ public class TaskServiceImpl implements TaskService {
 
     private void ensureForwardOnly(UserEntity actor, TaskEntity t, Status newStatus) {
         if (isAdmin(actor))
-            return; // admin puede todo
+            return; // admin puede
         Status next = nextOf(t.getStatus());
         if (next == null || next != newStatus) {
             throw new IllegalStateException("Transición no permitida para usuario");
@@ -92,14 +90,28 @@ public class TaskServiceImpl implements TaskService {
         if (t.getStatus() == null) t.setStatus(Status.ASSIGNED);
 
         // OWNER
-        UserEntity owner = isAdmin(actor)
-                ? (ownerId != null ? users.findById(ownerId).orElse(actor) : (t.getOwner() != null ? users.findById(t.getOwner().getId()).orElse(actor) : actor))
-                : actor;
+        UserEntity owner;
+        if (isAdmin(actor)) {
+            owner = Optional.ofNullable(ownerId)
+                    .flatMap(users::findById)
+                    .orElseGet(() -> Optional.ofNullable(t.getOwner())
+                            .map(u -> users.findById(u.getId()).orElse(actor))
+                            .orElse(actor));
+        } else {
+            owner = actor;
+        }
 
         // ASSIGNEE
-        UserEntity assignee = isAdmin(actor)
-                ? (assigneeId != null ? users.findById(assigneeId).orElse(actor) : (t.getAssignedTo() != null ? users.findById(t.getAssignedTo().getId()).orElse(actor) : actor))
-                : actor;
+        UserEntity assignee;
+        if (isAdmin(actor)) {
+            assignee = Optional.ofNullable(assigneeId)
+                    .flatMap(users::findById)
+                    .orElseGet(() -> Optional.ofNullable(t.getAssignedTo())
+                            .map(u -> users.findById(u.getId()).orElse(actor))
+                            .orElse(actor));
+        } else {
+            assignee = actor;
+        }
 
         t.setOwner(owner);
         t.setAssignedTo(assignee);

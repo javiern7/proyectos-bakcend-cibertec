@@ -23,7 +23,7 @@ public class MetricsServiceImpl implements MetricsService {
         int window = Math.max(1, days);
         LocalDate today = LocalDate.now();
         List<LocalDate> labels = IntStream.rangeClosed(window-1, 0)
-                .mapToObj(i -> today.minusDays(i)).toList();
+                .mapToObj(today::minusDays).toList();
 
         Map<LocalDate, int[]> buckets = new LinkedHashMap<>();
         labels.forEach(d -> buckets.put(d, new int[]{0,0,0}));
@@ -33,7 +33,7 @@ public class MetricsServiceImpl implements MetricsService {
             int a = ((Number) row[1]).intValue();
             int p = ((Number) row[2]).intValue();
             int f = ((Number) row[3]).intValue();
-            if (buckets.containsKey(d)) buckets.put(d, new int[]{a,p,f});
+            buckets.replace(d, new int[]{a, p, f});
         }
 
         Map<String,Object> out = new HashMap<>();

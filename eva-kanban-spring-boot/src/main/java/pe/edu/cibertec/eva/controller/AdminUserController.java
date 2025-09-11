@@ -1,16 +1,20 @@
 package pe.edu.cibertec.eva.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import pe.edu.cibertec.eva.entity.UserEntity;
 import pe.edu.cibertec.eva.service.UserService;
+import pe.edu.cibertec.eva.util.Constants;
 
 
 @Controller
 @RequestMapping("/admin/users")
-@SessionAttributes("user")
 public class AdminUserController {
+
+    private static final Logger log = LoggerFactory.getLogger(AdminUserController.class);
 
     private final UserService userService;
     public AdminUserController(UserService userService) { this.userService = userService; }
@@ -21,18 +25,20 @@ public class AdminUserController {
 
     @GetMapping
     public String list(@SessionAttribute("user") UserEntity current, Model model) {
-        if (!isAdmin(current)) return "redirect:/access-denied";
+        log.info("Admin: list users");
+        if (!isAdmin(current)) return Constants.REDIRECT_ACCESS_DENIED;
         model.addAttribute("user", current); // navbar
-        model.addAttribute("pageTitle", "Usuarios");
+        model.addAttribute(Constants.ATRIBUT_TITLE, "Usuarios");
         model.addAttribute("users", userService.findAll());
         return "users"; // crea users.html (tabla simple)
     }
 
     @GetMapping("/new")
     public String newUser(@SessionAttribute("user") UserEntity current, Model model) {
-        if (!isAdmin(current)) return "redirect:/access-denied";
+        log.info("Admin: open create-user form");
+        if (!isAdmin(current)) return Constants.REDIRECT_ACCESS_DENIED;
         model.addAttribute("user", current);
-        model.addAttribute("pageTitle", "Nuevo Usuario");
+        model.addAttribute(Constants.ATRIBUT_TITLE, "Nuevo Usuario");
         model.addAttribute("userForm", new UserEntity()); // objeto del form
         return "new-user";
     }
@@ -40,18 +46,20 @@ public class AdminUserController {
     @PostMapping("/create")
     public String create(@SessionAttribute("user") UserEntity current,
                          @ModelAttribute("userForm") UserEntity userForm) {
-        if (!isAdmin(current)) return "redirect:/access-denied";
-        userService.create(userForm);
-        return "redirect:/admin/users?created=1";
+        log.info("Admin: save user username={} by={}", current.getUsername(), userForm.getUsername());
+            if (!isAdmin(current)) return Constants.REDIRECT_ACCESS_DENIED;
+            userService.create(userForm);
+            return "redirect:/admin/users?created=1";
     }
 
     @GetMapping("/{id}/edit")
     public String edit(@PathVariable Long id,
                        @SessionAttribute("user") UserEntity current,
                        Model model) {
-        if (!isAdmin(current)) return "redirect:/access-denied";
+        log.info("Admin: open edit-user form");
+        if (!isAdmin(current)) return Constants.REDIRECT_ACCESS_DENIED;
         model.addAttribute("user", current);
-        model.addAttribute("pageTitle", "Editar Usuario");
+        model.addAttribute(Constants.ATRIBUT_TITLE, "Editar Usuario");
         model.addAttribute("userForm", userService.findById(id));
         return "edit-user";
     }
@@ -59,7 +67,8 @@ public class AdminUserController {
     @PostMapping("/update")
     public String update(@SessionAttribute("user") UserEntity current,
                          @ModelAttribute("userForm") UserEntity userForm) {
-        if (!isAdmin(current)) return "redirect:/access-denied";
+        log.info("Admin: open update-user form");
+        if (!isAdmin(current)) return Constants.REDIRECT_ACCESS_DENIED;
         userService.update(userForm);
         return "redirect:/admin/users?updated=1";
     }
@@ -67,8 +76,11 @@ public class AdminUserController {
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable Long id,
                          @SessionAttribute("user") UserEntity current) {
-        if (!isAdmin(current)) return "redirect:/access-denied";
-        userService.delete(id);
-        return "redirect:/admin/users?deleted=1";
+        log.warn("Admin: delete user id={} by={}", id, current.getUsername());
+            if (!isAdmin(current)) return Constants.REDIRECT_ACCESS_DENIED;
+            userService.delete(id);
+            log.info("Admin: user deleted id={}", id);
+            return "redirect:/admin/users?deleted=1";
+
     }
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org"
       th:replace="fragments/layout :: base (~{::section})">
     <head>
         <meta charset="UTF-8"/>
@@ -16,6 +16,8 @@
             /*<![CDATA[*/
             window.ctx = /*[[@{/}]]*/ "/";
             window.ctx = window.ctx.replace(/\/$/, "");
+            window.isAdmin = /*[[${isAdmin}]]*/ false;
+            window.userId  = /*[[${user.id}]]*/ null;
             /*]]>*/
         </script>
 
@@ -24,18 +26,18 @@
         </h2>
 
         <!-- Tabs -->
-        <ul class="nav nav-tabs mb-3" role="tablist">
-            <li class="nav-item" role="presentation">
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
                 <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-board" type="button" role="tab">
                     Tablero
                 </button>
             </li>
-            <li class="nav-item" role="presentation">
+            <li class="nav-item">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-dashboard" type="button" role="tab">
                     Dashboard
                 </button>
             </li>
-            <li class="nav-item" role="presentation" th:if="${isAdmin}">
+            <li class="nav-item" th:if="${isAdmin}">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-auditoria" type="button" role="tab">
                     Auditoría
                 </button>
@@ -169,11 +171,37 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-8">
-                        <div class="card shadow-sm">
-                            <div class="card-body">
-                                <h6 class="mb-2">Evolución semanal</h6>
-                                <canvas id="chart-week" height="120"></canvas>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <label for="chart-from" class="form-label mb-0 me-1">Desde</label>
+                        <input id="chart-from" type="date" class="form-control form-control-sm" style="width:auto">
+                        <label for="chart-to" class="form-label mb-0 ms-2 me-1">Hasta</label>
+                        <input id="chart-to" type="date" class="form-control form-control-sm" style="width:auto">
+                        <button id="chart-apply" class="btn btn-sm btn-primary ms-2">Aplicar</button>
+
+                        <!-- Solo ADMIN -->
+                        <select id="chart-user" class="form-select form-select-sm ms-3" style="width:auto; display:none"></select>
+
+                        <!-- atajos -->
+                        <div class="btn-group btn-group-sm ms-2">
+                            <button class="btn btn-outline-secondary" data-range="7">7 días</button>
+                            <button class="btn btn-outline-secondary" data-range="30">30 días</button>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <div class="card shadow-sm">
+                                <div class="card-body">
+                                    <h6 class="mb-2">Evolución semanal</h6>
+                                    <canvas id="chart-week" height="120"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Estado actual</h6>
+                                    <canvas id="chart-status"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>

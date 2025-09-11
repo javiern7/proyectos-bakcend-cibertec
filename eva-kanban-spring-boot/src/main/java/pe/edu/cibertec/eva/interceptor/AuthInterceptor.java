@@ -1,36 +1,20 @@
 package pe.edu.cibertec.eva.interceptor;
 
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import pe.edu.cibertec.eva.entity.UserEntity;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import java.util.Set;
 
+@Component
 public class AuthInterceptor implements HandlerInterceptor {
-    private static final Set<String> PUBLIC = Set.of("/login", "/doLogin", "/index.html");
-
-    public boolean preHandle(HttpServletRequest req, HttpServletResponse res, Object handler) throws Exception {
-        String path = req.getServletPath();
-
-        if (PUBLIC.contains(path)) return true;
-        if (path.startsWith("/resources/") || path.startsWith("/static/") ||
-                path.startsWith("/static/css/") || path.startsWith("/js/") ||
-                path.startsWith("/images/") || path.startsWith("/webjars/")) {
+    @Override public boolean preHandle(HttpServletRequest req, HttpServletResponse res, Object handler) throws Exception {
+        if (req.getRequestURI().startsWith("/login") || req.getRequestURI().startsWith("/css")
+                || req.getRequestURI().startsWith("/js") || req.getRequestURI().startsWith("/images")) {
             return true;
         }
-
-        HttpSession session = req.getSession(false);
-        UserEntity u = (session != null) ? (UserEntity) session.getAttribute("user") : null;
-
-        if (u == null) {
-            String xhr = req.getHeader("X-Requested-With");
-            if ("XMLHttpRequest".equalsIgnoreCase(xhr)) {
-                res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            } else {
-                res.sendRedirect(req.getContextPath() + "/login");
-            }
+        Object user = req.getSession(false) != null ? req.getSession(false).getAttribute("user") : null;
+        if (user == null) {
+            res.sendRedirect(req.getContextPath() + "/login?required=1");
             return false;
         }
         return true;

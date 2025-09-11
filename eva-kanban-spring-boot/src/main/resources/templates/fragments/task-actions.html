@@ -3,7 +3,7 @@
      th:fragment="actions (task, user)"
      class="task-actions">
 
-    <!-- ADMIN: todo habilitado -->
+    <!-- ADMIN: tasks habilitado -->
     <div th:if="${isAdmin}">
         <a th:href="@{/task/{id}/edit(id=${task.id})}"
            class="btn btn-sm btn-outline-secondary me-2">Editar</a>
@@ -56,7 +56,7 @@
                 title="Solo admin puede eliminar">Eliminar</button>
     </div>
 
-    <!-- Otros usuarios (no asignado) o DONE sin permisos: todo deshabilitado -->
+    <!-- Otros usuarios (no asignado) o DONE sin permisos: tasks deshabilitado -->
     <div th:if="${!isAdmin and (user == null
                  or task.assignedTo == null
                  or user.username != task.assignedTo.username)}">

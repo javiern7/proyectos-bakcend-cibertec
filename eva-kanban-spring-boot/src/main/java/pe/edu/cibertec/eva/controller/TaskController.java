@@ -1,5 +1,7 @@
 package pe.edu.cibertec.eva.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,13 +16,16 @@ import pe.edu.cibertec.eva.service.TaskService;
 import pe.edu.cibertec.eva.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import pe.edu.cibertec.eva.util.Constants;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 @Controller
-@SessionAttributes("user")
 public class TaskController {
+
+    private static final Logger log = LoggerFactory.getLogger(TaskController.class);
 
     private final TaskService taskService;
     private final UserService userService;
@@ -30,7 +35,7 @@ public class TaskController {
         this.userService = userService;
     }
 
-    private boolean isAdmin(UserEntity u) { return u != null && u.getRole().equalsIgnoreCase("ADMIN"); }
+    private boolean isAdmin(UserEntity u) { return u != null && u.getRole().equalsIgnoreCase(Constants.ATRIBUT_ADMIN); }
 
     // disponible para todas las vistas de este controller (combo de estados)
     @ModelAttribute("statuses")
@@ -41,12 +46,13 @@ public class TaskController {
     @GetMapping({"/", "/board"})
     public String board(@SessionAttribute(value = "user", required = false) UserEntity user,
                         Model model) {
+        log.info("Board: Iniciando panel");
         if (user == null) return "redirect:/login";
 
         // Datos base
         model.addAttribute("user", user);
         model.addAttribute("currentUsername", user.getUsername());
-        boolean isAdmin = user.getRole() != null && user.getRole().equalsIgnoreCase("ADMIN");
+        boolean isAdmin = user.getRole() != null && user.getRole().equalsIgnoreCase(Constants.ATRIBUT_ADMIN);
         model.addAttribute("isAdmin", isAdmin);
 
         // Tareas visibles para el usuario
@@ -73,16 +79,17 @@ public class TaskController {
         model.addAttribute("newTask", new TaskEntity());
         model.addAttribute("statuses", Status.values());
 
-        model.addAttribute("pageTitle", "Tablero de Tareas");
-        model.addAttribute("isAdmin", user.getRole().equals("ADMIN"));
+        model.addAttribute(Constants.ATRIBUT_TITLE, "Tablero de Tareas");
+        model.addAttribute("isAdmin", user.getRole().equals(Constants.ATRIBUT_ADMIN));
 
         return "board";
     }
 
     @GetMapping("/task/new")
     public String newTask(@SessionAttribute("user") UserEntity current, Model model) {
+        log.info("Create: new user={}", current.getUsername());
         model.addAttribute("user", current);
-        model.addAttribute("pageTitle", "Nueva Tarea");
+        model.addAttribute(Constants.ATRIBUT_TITLE, "Nueva Tarea");
         model.addAttribute("task", new TaskEntity());
         model.addAttribute("assignees", userService.findAll());
         model.addAttribute("owners", userService.findAll());
@@ -94,17 +101,23 @@ public class TaskController {
                          @RequestParam(value = "ownerId", required = false) Long ownerId,
                          @RequestParam(value = "assigneeId", required = false) Long assigneeId,
                          @SessionAttribute("user") UserEntity current) {
-        taskService.create(task, current, ownerId, assigneeId);
-        return "redirect:/board?saved=1";
+        log.info("Task: save title='{}' assignee={} by={}",
+                task.getTitle(),
+                task.getAssignedTo()!=null?task.getAssignedTo().getUsername():"-",
+                current.getUsername());
+            taskService.create(task, current, ownerId, assigneeId);
+            log.info("Task: saved id={} status={}", task.getId(), task.getStatus());
+            return "redirect:/board?saved=1";
     }
 
     @GetMapping("/task/edit/{id}")
     public String edit(@PathVariable Long id,
                        @SessionAttribute("user") UserEntity user,
                        Model model) {
+        log.info("Task: open edit id={} by={}", id, user.getUsername());
         TaskEntity t = taskService.findById(id);
         model.addAttribute("user", user);
-        model.addAttribute("pageTitle", "Editar Tarea");
+        model.addAttribute(Constants.ATRIBUT_TITLE, "Editar Tarea");
         model.addAttribute("task", t);
         // lista de posibles asignatarios: si ADMIN todos, si USER solo él
         model.addAttribute("assignees", isAdmin(user) ? userService.findAll() : List.of(user));
@@ -122,14 +135,16 @@ public class TaskController {
 
     @PostMapping(value = "/task/{id}/status", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
-    public ResponseEntity<?> changeStatus(@PathVariable Long id,
+    public ResponseEntity<String> changeStatus(@PathVariable Long id,
                                           @RequestParam("status") Status status,
                                           @SessionAttribute("user") UserEntity actor,
                                           @RequestHeader(value = "X-Requested-With", required = false) String xhr,
                                           HttpServletRequest request) {
+        final String username = (actor != null && actor.getUsername() != null) ? actor.getUsername() : "anonymous";
+        log.info("Task: change status id={} -> {} by={}", id, status, username);
         try {
             taskService.updateStatus(id, status, actor);
-
+            log.info("Task: status updated id={} new={}", id, status);
             // AJAX (nuestro fetch envía este header)
             if ("XMLHttpRequest".equalsIgnoreCase(xhr)) {
                 return ResponseEntity.ok().build();
@@ -142,16 +157,19 @@ public class TaskController {
                     .build();
 
         } catch (IllegalStateException e) {
+            log.warn("Task: invalid state change id={} new={} by={} msg={}", id, status, username, e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (IllegalArgumentException e) {
+            log.warn("Task: not found id={} msg={}", id, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
+            log.error("Task: unexpected error changing status id={} by={}", id, username, e);
             return ResponseEntity.status(HttpStatus.CONFLICT).body("No se pudo actualizar el estado");
         }
     }
 
     @GetMapping("/task/{id}/status")
-    public String statusGuard(HttpServletRequest request) {
+    public String statusGuard(@PathVariable Long id,HttpServletRequest request) {
         return "redirect:" + request.getContextPath() + "/board";
     }
 

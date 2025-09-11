@@ -11,8 +11,6 @@ import java.util.Map;
 public interface TaskService {
     List<TaskEntity> findAllFor(UserEntity user);       // trae tareas con owner ya cargado
     Map<String, Long> metricsFor(UserEntity user);
-    //Task create(Task task, User current, Long ownerId);
-    //Task update(Task task, User current, Long ownerId);
     TaskEntity create(TaskEntity t, UserEntity current, Long ownerId, Long assigneeId);
     TaskEntity update(TaskEntity t, UserEntity current, Long ownerId, Long assigneeId);
     TaskEntity findById(Long id);
@@ -22,7 +20,5 @@ public interface TaskService {
     TaskEntity reassign(Long id, String newUsername, UserEntity actor);   // con actor (auditoría)
     void delete(Long id);
     void delete(Long id, UserEntity actor);
-    //long countAssigned();
-    //long countInProgress();
-    //long countDone();
+
 }

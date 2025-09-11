@@ -33,10 +33,4 @@ public interface AuditLogService {
     /** Falla‑seguro genérico para casos especiales o utilitarios */
     void logCustom(String action, Long actorId, String actorUsername, Long taskId,
                    String details, String oldStatus, String newStatus);
-
-
-    //void logStatusChange(Long actorId, String actorUsername,
-                         //Long taskId, String oldStatus, String newStatus, String details);
-    //void logEdit(Long actorId, String actorUsername, Long taskId, String details);
-    //void logGeneric(String action, Long actorId, String actorUsername, Long taskId, String details);
 }

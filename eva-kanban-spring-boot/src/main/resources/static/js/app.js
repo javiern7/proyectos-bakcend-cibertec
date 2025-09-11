@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderActionsHtml(id, status, canAdvance, isAdmin) {
-        // --- ADMIN: todo habilitado ---
+        // --- ADMIN: esta habilitado ---
         if (isAdmin) {
             const next = nextStatusOf(status);
             const nextForm = next ? `
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const prevStatus = card.dataset.status;
         const newStatus = zone.dataset.status;
 
-        // Permisos: admin puede todo, user solo dueño y hacia delante
+        // Permisos: admin puede ser, user solo dueño y hacia delante
         const owner = (card.dataset.owner === 'true');
         const forwardOnly = nextStatusOf(prevStatus);
         const canByUser = owner && forwardOnly === newStatus;
@@ -231,6 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             updateCardUIForStatus(card, newStatus);
             refreshCounters();
+            if (window.refreshDashboard) {await window.refreshDashboard();}
         }
     }
 
